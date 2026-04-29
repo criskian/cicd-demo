@@ -87,3 +87,90 @@ Using Docker:
 ```bash
 APP_URL=http://dev-cicd-demo-master.anzcd.internal/ make systemTest
 ```
+
+## Jenkins workshop pipeline
+
+This repository includes a Jenkins declarative pipeline for a local CI/CD workshop.
+The pipeline reads the `Jenkinsfile` from SCM and validates the application before
+deployment.
+
+### Local infrastructure
+
+Run Jenkins with access to the Docker daemon so the pipeline can build and run
+containers:
+
+```bash
+docker run -d --name jenkins-cicd -u root \
+  -p 8080:8080 -p 50000:50000 \
+  -v jenkins_cicd_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  jenkins/jenkins:lts-jdk17
+```
+
+Create a shared Docker network and run SonarQube:
+
+```bash
+docker network create cicd-workshop
+docker network connect cicd-workshop jenkins-cicd
+docker run -d --name sonarqube --network cicd-workshop \
+  -p 9000:9000 \
+  -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
+  sonarqube:lts-community
+```
+
+Install Maven, Docker CLI and Trivy in the Jenkins agent/container:
+
+```bash
+apt-get update
+apt-get install -y maven docker.io wget gnupg
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
+  | gpg --dearmor > /usr/share/keyrings/trivy.gpg
+echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
+  > /etc/apt/sources.list.d/trivy.list
+apt-get update
+apt-get install -y trivy
+```
+
+In Jenkins, create a `Secret text` credential with ID `sonar-token`. The secret
+value must be a SonarQube user token created from `http://localhost:9000`.
+
+### Jenkins job
+
+Create a Jenkins Pipeline job using:
+
+```text
+Definition: Pipeline script from SCM
+SCM: Git
+Repository URL: https://github.com/criskian/cicd-demo.git
+Branch Specifier: */master
+Script Path: Jenkinsfile
+```
+
+### Pipeline stages
+
+The pipeline executes:
+
+* `Checkout`: obtains the source code from GitHub.
+* `Build & Test`: runs Maven package with unit and integration tests.
+* `Static Analysis (SonarQube)`: sends analysis to SonarQube.
+* `Quality Gate (SonarQube)`: fails if the SonarQube Quality Gate fails or if
+  pending Security Hotspots are detected.
+* `Container Security Scan (Trivy)`: builds the Docker image and fails if Trivy
+  finds `CRITICAL` vulnerabilities.
+* `Deploy`: deploys `mi-app:latest` on port `8081` for `master`/`main`.
+* `Validate`: verifies that the deployed Spring Boot app started correctly.
+* `post`: publishes test results and artifacts, cleans the workspace and removes
+  partial deployments when the pipeline fails.
+
+### Expected evidence
+
+Capture the following evidence for the workshop:
+
+* Jenkins job configuration showing `Pipeline script from SCM`.
+* Stage View showing the advanced stages.
+* Console output showing `ANALYSIS SUCCESSFUL` from SonarQube.
+* SonarQube dashboard for project `mi-app`.
+* Console output from the SonarQube quality gate, including Security Hotspots.
+* Console output from Trivy. If `CRITICAL` vulnerabilities are found, the
+  pipeline must fail before `Deploy`.
+* If all gates pass, browser validation at `http://localhost:8081/config`.

@@ -1,0 +1,7 @@
+au/com/equifax/cicddemo/domain/UnitTest.class
+au/com/equifax/cicddemo/SeleniumExampleTest.class
+au/com/equifax/cicddemo/UserServiceTest.class
+au/com/equifax/cicddemo/CicdDemoApplicationTests.class
+au/com/equifax/cicddemo/domain/IntegrationTest.class
+au/com/equifax/cicddemo/domain/SystemTest.class
+au/com/equifax/cicddemo/UserControllerIntTest.class

@@ -1,0 +1,8 @@
+/srv/app/src/main/java/au/com/equifax/cicddemo/controller/UserController.java
+/srv/app/src/main/java/au/com/equifax/cicddemo/controller/ApiController.java
+/srv/app/src/main/java/au/com/equifax/cicddemo/service/UserService.java
+/srv/app/src/main/java/au/com/equifax/cicddemo/domain/User.java
+/srv/app/src/main/java/au/com/equifax/cicddemo/controller/ConfigController.java
+/srv/app/src/main/java/au/com/equifax/cicddemo/domain/EnvDetail.java
+/srv/app/src/main/java/au/com/equifax/cicddemo/CicdDemoApplication.java
+/srv/app/src/main/java/au/com/equifax/cicddemo/service/UserServiceImpl.java

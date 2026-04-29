@@ -1,0 +1,7 @@
+/srv/app/src/test/java/au/com/equifax/cicddemo/domain/SystemTest.java
+/srv/app/src/test/java/au/com/equifax/cicddemo/CicdDemoApplicationTests.java
+/srv/app/src/test/java/au/com/equifax/cicddemo/domain/IntegrationTest.java
+/srv/app/src/test/java/au/com/equifax/cicddemo/domain/UnitTest.java
+/srv/app/src/test/java/au/com/equifax/cicddemo/UserServiceTest.java
+/srv/app/src/test/java/au/com/equifax/cicddemo/UserControllerIntTest.java
+/srv/app/src/test/java/au/com/equifax/cicddemo/SeleniumExampleTest.java

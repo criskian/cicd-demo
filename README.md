@@ -156,11 +156,13 @@ The pipeline executes:
 * `Quality Gate (SonarQube)`: fails if the SonarQube Quality Gate fails or if
   pending Security Hotspots are detected.
 * `Container Security Scan (Trivy)`: builds the Docker image and fails if Trivy
-  finds `CRITICAL` vulnerabilities.
-* `Deploy`: deploys `mi-app:latest` on port `8081` for `master`/`main`.
+  finds `CRITICAL` operating-system vulnerabilities in the image.
+* `Deploy`: deploys `mi-app:latest` with `docker run -d -p 80:80 mi-app:latest`
+  for `master`/`main`.
 * `Validate`: verifies that the deployed Spring Boot app started correctly.
 * `post`: publishes test results and artifacts, cleans the workspace and removes
-  partial deployments when the pipeline fails.
+  partial deployments when the pipeline fails. The `failure` block prints a
+  clear notification message in the Jenkins console.
 
 ### Expected evidence
 
@@ -173,4 +175,17 @@ Capture the following evidence for the workshop:
 * Console output from the SonarQube quality gate, including Security Hotspots.
 * Console output from Trivy. If `CRITICAL` vulnerabilities are found, the
   pipeline must fail before `Deploy`.
-* If all gates pass, browser validation at `http://localhost:8081/config`.
+* If all gates pass, browser validation at `http://localhost/config`.
+
+### Final deployment test
+
+The application exposes a visible deployment marker at `/config`:
+
+```text
+Current profile CI/CD Workshop Final Deployment
+```
+
+To demonstrate the final CI/CD flow, commit a small text change, push it to
+GitHub and run the Jenkins job again. Jenkins should detect the SCM change,
+build the JAR, analyze the code, scan the Docker image, deploy the container and
+validate the final response when all gates pass.

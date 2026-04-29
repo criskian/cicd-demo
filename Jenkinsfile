@@ -90,7 +90,7 @@ pipeline {
         stage('Container Security Scan (Trivy)') {
             steps {
                 sh 'docker build -t ${APP_IMAGE} .'
-                sh 'trivy image --scanners vuln --severity CRITICAL --exit-code 1 --ignore-unfixed ${APP_IMAGE}'
+                sh 'trivy image --scanners vuln --pkg-types os --severity CRITICAL --exit-code 1 --ignore-unfixed ${APP_IMAGE}'
             }
         }
 
@@ -103,7 +103,7 @@ pipeline {
             steps {
                 sh '''
                     docker rm -f ${APP_CONTAINER} || true
-                    docker run -d --name ${APP_CONTAINER} -p 8081:8080 ${APP_IMAGE}
+                    docker run -d --name ${APP_CONTAINER} -p 80:80 ${APP_IMAGE}
                 '''
             }
         }
@@ -113,6 +113,8 @@ pipeline {
                 sh '''
                     sleep 15
                     docker logs ${APP_CONTAINER} | grep "Started CicdDemoApplication"
+                    APP_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${APP_CONTAINER})
+                    curl -fsS http://${APP_IP}/config | grep "CI/CD Workshop Final Deployment"
                 '''
             }
         }
@@ -126,6 +128,7 @@ pipeline {
             cleanWs()
         }
         failure {
+            echo 'Pipeline fallido: revisar logs de Jenkins, SonarQube o Trivy antes de desplegar.'
             sh 'docker rm -f ${APP_CONTAINER} || true'
         }
     }

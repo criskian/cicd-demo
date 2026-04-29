@@ -36,9 +36,8 @@ pipeline {
 
         stage('Deploy') {
             when {
-                anyOf {
-                    branch 'main'
-                    branch 'master'
+                expression {
+                    return !env.BRANCH_NAME || env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master'
                 }
             }
             steps {
